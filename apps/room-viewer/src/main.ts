@@ -365,7 +365,7 @@ function setMode(next: Mode) {
   navigation.hidden = mode !== 'orbit';
   activate('mode', mode);
   invalidate();
-  hud.querySelectorAll<HTMLElement>('.help').forEach((el) => {
+  hud.querySelectorAll<HTMLElement>('.help[data-for]').forEach((el) => {
     el.hidden = el.dataset.for !== mode;
   });
 }
@@ -651,6 +651,10 @@ const viewportObserver = new ResizeObserver(() => {
   if (room && mode === 'orbit' && nextAspect > 0) {
     const scale = Math.max(1, 1.18 / nextAspect) / Math.max(1, 1.18 / camera.aspect);
     camera.position.sub(orbit.target).multiplyScalar(scale).add(orbit.target);
+    if (transition) {
+      transition.from.sub(transition.fromTarget).multiplyScalar(scale).add(transition.fromTarget);
+      transition.to.sub(transition.toTarget).multiplyScalar(scale).add(transition.toTarget);
+    }
   }
   camera.aspect = nextAspect;
   camera.updateProjectionMatrix();
