@@ -1,10 +1,12 @@
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
+import { localRoomsPlugin } from '../../tools/local-rooms.mjs';
 
 const app = import.meta.dirname;
 const repository = resolve(app, '../..');
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  plugins: [localRoomsPlugin(repository, command)],
   root: app,
   base: process.env.VIEWER_BASE || '/',
   optimizeDeps: { include: ['three/addons/objects/Reflector.js'] },
@@ -25,4 +27,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
