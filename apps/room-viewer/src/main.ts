@@ -184,6 +184,11 @@ async function loadRoom(id: string, updated?: RoomModule) {
   referenceLoading = undefined;
   referenceEpoch++;
   room = next;
+  const roomNote = document.querySelector<HTMLElement>('#room-note')!;
+  roomNote.textContent = room.note ?? '';
+  roomNote.hidden = !room.note;
+  hud.querySelector<HTMLButtonElement>('[data-source=model]')!.textContent = room.sourceLabel ?? 'Rebuilt';
+  hud.querySelector<HTMLButtonElement>('.play-link')!.hidden = room.playgroundAvailable === false;
   activeRoomId = mod.id;
   transition = undefined;
   movingRatio = Math.min(window.devicePixelRatio, 1);
@@ -641,7 +646,13 @@ document.addEventListener('visibilitychange', () => {
   else invalidate();
 });
 const viewportObserver = new ResizeObserver(() => {
-  camera.aspect = viewport.clientWidth / viewport.clientHeight;
+  const nextAspect = viewport.clientWidth / viewport.clientHeight;
+  // Opening/closing controls changes the narrow-screen canvas aspect. Preserve framing.
+  if (room && mode === 'orbit' && nextAspect > 0) {
+    const scale = Math.max(1, 1.18 / nextAspect) / Math.max(1, 1.18 / camera.aspect);
+    camera.position.sub(orbit.target).multiplyScalar(scale).add(orbit.target);
+  }
+  camera.aspect = nextAspect;
   camera.updateProjectionMatrix();
   renderer.setSize(viewport.clientWidth, viewport.clientHeight);
   pipeline.setSize(viewport.clientWidth, viewport.clientHeight);

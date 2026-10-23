@@ -1,6 +1,6 @@
 import { appURL } from '../asset-base';
 import * as THREE from 'three';
-import { ROOMS, roomById } from '../../../../demos/index';
+import { ROOMS } from '../../../../demos/index';
 import { configureRenderer } from '../../../../packages/room-runtime/lighting';
 import { setMaxAnisotropy } from '../../../../packages/room-runtime/materials';
 import { applyRoomRendering, createPipeline, precompileRoomRendering } from '../../../../packages/room-runtime/render';
@@ -12,7 +12,8 @@ import { DynamicShadows } from '../../../../packages/room-runtime/dynamic-shadow
 
 const q = new URLSearchParams(location.search);
 if (import.meta.hot && q.get('hmr') === '0') import.meta.hot.on('vite:beforeFullReload', () => new Promise(() => {}));
-const roomModule = roomById(q.get('room'));
+const playRooms = ROOMS.filter(room => room.playgroundAvailable !== false);
+const roomModule = playRooms.find(room => room.id === q.get('room')) ?? playRooms[0];
 const roomId = roomModule.id;
 const canvas = document.querySelector<HTMLCanvasElement>('#scene')!;
 const loader = document.querySelector<HTMLElement>('#loader')!;
@@ -24,7 +25,7 @@ const actionHint = document.querySelector<HTMLElement>('#action-hint')!;
 const statsEl = document.querySelector<HTMLElement>('#stats')!;
 const quality = document.querySelector<HTMLSelectElement>('#play-quality')!;
 const roomSelect = document.querySelector<HTMLSelectElement>('#room-select')!;
-for (const r of ROOMS) roomSelect.add(new Option(r.label, r.id, false, r.id === roomId));
+for (const r of playRooms) roomSelect.add(new Option(r.label, r.id, false, r.id === roomId));
 roomSelect.addEventListener('change', () => { location.href = `?room=${roomSelect.value}&mode=${fpv.active ? 'fpv' : 'playground'}`; });
 document.querySelector('#room-name')!.textContent = roomModule.label;
 menu.querySelector<HTMLAnchorElement>('.back a')!.href = appURL(`?room=${roomId}`);

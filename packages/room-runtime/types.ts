@@ -5,6 +5,10 @@ export type V3 = [number, number, number];
 
 /** A rebuilt room, ready to drop into the viewer (or the capture page) */
 export interface BuiltRoom {
+  /** Short provenance displayed beside the room controls. */
+  note?: string;
+  sourceLabel?: string;
+  playgroundAvailable?: boolean;
   layout?: RoomLayout;
   group: THREE.Group;
   lights: THREE.Group;
@@ -74,6 +78,7 @@ export interface PhotoPose {
 export interface RoomModule {
   id: string;
   label: string;
+  playgroundAvailable?: boolean;
   build(): Promise<BuiltRoom>;
 }
 
