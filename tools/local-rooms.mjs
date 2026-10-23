@@ -17,7 +17,9 @@ export function localRoomEntries(repository, command) {
       || typeof entry.file !== 'string' || !entry.file.toLowerCase().endsWith('.usdz')) {
       throw new Error('Each local room needs a unique local- id, a label, and a USDZ file.');
     }
-    const file = realpathSync(resolve(root, entry.file));
+    let file;
+    try { file = realpathSync(resolve(root, entry.file)); }
+    catch (cause) { throw new Error(`Cannot read local room ${entry.id}: check that ${entry.file} exists in data/scans.`, { cause }); }
     const path = relative(root, file);
     if (isAbsolute(path) || path === '..' || path.startsWith(`..${sep}`)) {
       throw new Error('Local room files must stay inside data/scans.');

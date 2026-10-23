@@ -15,7 +15,13 @@ export function buildImportedRoom(model: THREE.Group): BuiltRoom {
   }
   const floorRoot = model.getObjectByName('Floor_grp');
   if (!floorRoot) throw new Error('This import requires a RoomPlan USDZ with a floor.');
+  const floors: THREE.Mesh[] = [];
+  floorRoot.traverse(node => { if (node instanceof THREE.Mesh && /^Floor/i.test(node.name)) floors.push(node); });
+  if (!floors.length) throw new Error('No floor meshes found in this RoomPlan USDZ.');
   const floorBounds = new THREE.Box3().setFromObject(floorRoot);
+  if (floorBounds.isEmpty() || !Number.isFinite(floorBounds.min.length() + floorBounds.max.length())) {
+    throw new Error('This RoomPlan USDZ has no finite floor geometry.');
+  }
   const center = floorBounds.getCenter(new THREE.Vector3());
   const group = new THREE.Group();
   group.name = 'imported-room';
@@ -24,7 +30,6 @@ export function buildImportedRoom(model: THREE.Group): BuiltRoom {
   group.position.set(-center.x, -floorBounds.max.y, -center.z);
   group.updateMatrixWorld(true);
 
-  const floors: THREE.Mesh[] = [];
   const oldMaterials = new Set<THREE.Material>();
   const palette = { wall: '#e3e0d8', floor: '#b6aa91', window: '#8eafb9', door: '#c7b99e', object: '#81928d' };
   const materials = Object.fromEntries(Object.entries(palette).map(([key, color]) => [key,
@@ -42,7 +47,6 @@ export function buildImportedRoom(model: THREE.Group): BuiltRoom {
     }
     node.castShadow = category !== 'floor';
     node.receiveShadow = true;
-    if (category === 'floor') floors.push(node);
     if (category === 'object') node.userData.physics = { type: 'static' };
   });
   const retainedMaterials = new Set<THREE.Material>();

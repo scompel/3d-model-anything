@@ -29,4 +29,7 @@ test('empty or non-RoomPlan imports fail clearly', () => {
   assert.throws(() => buildImportedRoom(new THREE.Group()), /no finite/);
   const model = new THREE.Group(); model.add(new THREE.Mesh(new THREE.BoxGeometry()));
   assert.throws(() => buildImportedRoom(model), /with a floor/);
+  const floor = new THREE.Group(); floor.name = 'Floor_grp';
+  floor.add(new THREE.Mesh(new THREE.BoxGeometry())); model.add(floor);
+  assert.throws(() => buildImportedRoom(model), /No floor meshes/);
 });

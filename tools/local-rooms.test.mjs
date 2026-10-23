@@ -25,6 +25,8 @@ test('local scan manifests are validated and never included in production', () =
     symlinkSync(join(root, 'outside.usdz'), join(scans, 'linked.usdz'));
     write([{ ...entry, file: 'linked.usdz' }]);
     assert.throws(() => localRoomEntries(root, 'serve'), /inside data\/scans/);
+    write([{ ...entry, file: 'missing.usdz' }]);
+    assert.throws(() => localRoomEntries(root, 'serve'), /missing.usdz exists in data\/scans/);
     writeFileSync(manifest, 'invalid json');
     assert.deepEqual(localRoomEntries(root, 'build'), []);
   } finally { rmSync(root, { recursive: true, force: true }); }
